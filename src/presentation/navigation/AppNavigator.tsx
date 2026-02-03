@@ -18,6 +18,8 @@ import {
 // Screens
 import { LoginScreen } from "../screens/auth/LoginScreen";
 import { RegisterScreen } from "../screens/auth/RegisterScreen";
+import { ForgotPasswordScreen } from "../screens/auth/ForgotPasswordScreen";
+import { ResetPasswordScreen } from "../screens/auth/ResetPasswordScreen";
 import { CurrentRatesScreen } from "../screens/rates/CurrentRatesScreen";
 import { TradeScreen } from "../screens/trade/TradeScreen";
 import { WalletScreen } from "../screens/wallet/WalletScreen";
@@ -28,6 +30,8 @@ import { HomeScreen } from "../screens/home/HomeScreen";
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
+  ForgotPassword: undefined;
+  ResetPassword: { token?: string };
 };
 
 export type MainTabParamList = {
@@ -61,6 +65,11 @@ const AuthNavigator = () => {
     >
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Register" component={RegisterScreen} />
+      <AuthStack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+      />
+      <AuthStack.Screen name="ResetPassword" component={ResetPasswordScreen} />
     </AuthStack.Navigator>
   );
 };

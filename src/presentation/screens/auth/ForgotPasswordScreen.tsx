@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { ScreenWrapper } from "../../components/ScreenWrapper";
@@ -10,36 +10,49 @@ import { theme } from "../../theme/theme";
 import { useAuth } from "../../context/AuthContext";
 import { AuthStackParamList } from "../../navigation/AppNavigator";
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<
+type ForgotPasswordScreenNavigationProp = NativeStackNavigationProp<
   AuthStackParamList,
-  "Login"
+  "ForgotPassword"
 >;
 
-export const LoginScreen = () => {
-  const navigation = useNavigation<LoginScreenNavigationProp>();
-  const { login, isLoading, error, clearError } = useAuth();
+export const ForgotPasswordScreen = () => {
+  const navigation = useNavigation<ForgotPasswordScreenNavigationProp>();
+  const { forgotPassword, isLoading, error, clearError } = useAuth();
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert("Validation Error", "Please enter both email and password.");
+  const handleSendLink = async () => {
+    if (!email.trim()) {
+      Alert.alert("Validation Error", "Please enter your email address.");
       return;
     }
 
     try {
-      await login(email.trim(), password);
+      const response = await forgotPassword(email.trim());
+      // For this assignment, we might get a debug token back.
+      // If response.debugToken exists, we can show it or auto-fill it for the user in the next screen.
+      // But typically, we just say "Check your email".
+
+      let message = "Check your email for the reset link.";
+      if (response && response.debugToken) {
+        message += `\n\n(Debug: Token is ${response.debugToken})`;
+      }
+
+      Alert.alert("Link Sent", message, [
+        {
+          text: "OK",
+          onPress: () =>
+            navigation.navigate("ResetPassword", {
+              token: response?.debugToken,
+            }),
+        },
+      ]);
     } catch {
       Alert.alert(
-        "Login Failed",
-        error || "Invalid credentials. Please try again.",
+        "Failed",
+        error || "Could not send reset link. Please try again.",
       );
     }
-  };
-
-  const handleForgotPassword = () => {
-    navigation.navigate("ForgotPassword");
   };
 
   const handleEmailChange = (text: string) => {
@@ -47,28 +60,23 @@ export const LoginScreen = () => {
     setEmail(text);
   };
 
-  const handlePasswordChange = (text: string) => {
-    clearError();
-    setPassword(text);
-  };
-
   return (
     <ScreenWrapper style={styles.container}>
       <View style={styles.header}>
         <Typography
-          variant="h1"
+          variant="h2"
           align="center"
           style={styles.title}
           color={theme.colors.primary}
         >
-          MobileCurrency
+          Reset Password
         </Typography>
         <Typography
           variant="body"
           align="center"
           color={theme.colors.textSecondary}
         >
-          Sign in to access your wallet
+          Enter your email to receive a reset link
         </Typography>
       </View>
 
@@ -81,22 +89,6 @@ export const LoginScreen = () => {
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        <Input
-          label="Password"
-          placeholder="Enter your password"
-          value={password}
-          onChangeText={handlePasswordChange}
-          secureTextEntry={true}
-        />
-
-        <TouchableOpacity
-          style={styles.forgotPassword}
-          onPress={handleForgotPassword}
-        >
-          <Typography variant="caption" color={theme.colors.primary}>
-            Forgot Password?
-          </Typography>
-        </TouchableOpacity>
 
         {error && (
           <Typography
@@ -109,24 +101,21 @@ export const LoginScreen = () => {
         )}
 
         <Button
-          title="Sign In"
-          onPress={handleLogin}
+          title="Send Reset Link"
+          onPress={handleSendLink}
           loading={isLoading}
           fullWidth={true}
           style={styles.button}
-          disabled={!email.trim() || !password.trim()}
+          disabled={!email.trim()}
         />
-      </View>
 
-      <View style={styles.footer}>
-        <Typography variant="body" color={theme.colors.textSecondary}>
-          Don't have an account?{" "}
-        </Typography>
-        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-          <Typography variant="body" color={theme.colors.primary} weight="bold">
-            Sign Up
-          </Typography>
-        </TouchableOpacity>
+        <Button
+          title="Back to Login"
+          onPress={() => navigation.goBack()}
+          variant="ghost"
+          fullWidth={true}
+          style={styles.backButton}
+        />
       </View>
     </ScreenWrapper>
   );
@@ -135,6 +124,7 @@ export const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     justifyContent: "center",
+    paddingHorizontal: theme.spacing.lg,
   },
   header: {
     marginBottom: theme.spacing.xxl,
@@ -146,20 +136,14 @@ const styles = StyleSheet.create({
   form: {
     width: "100%",
   },
-  forgotPassword: {
-    alignSelf: "flex-end",
-    marginBottom: theme.spacing.md,
-  },
   errorText: {
     marginBottom: theme.spacing.md,
     textAlign: "center",
   },
   button: {
-    marginTop: theme.spacing.sm,
+    marginTop: theme.spacing.lg,
   },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: theme.spacing.xl,
+  backButton: {
+    marginTop: theme.spacing.sm,
   },
 });

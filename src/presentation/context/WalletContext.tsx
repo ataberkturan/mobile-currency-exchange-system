@@ -7,6 +7,8 @@ import React, {
 } from "react";
 import { WalletBalance } from "../../domain/entities/WalletBalance";
 import { walletRepository } from "../../data/repositories/WalletRepository";
+import { Transaction } from "../../domain/entities/Transaction";
+import { transactionRepository } from "../../data/repositories/TransactionRepository";
 
 interface WalletContextType {
   balances: WalletBalance[];
@@ -14,6 +16,7 @@ interface WalletContextType {
   isLoading: boolean;
   refreshWallet: () => Promise<void>;
   getBalance: (currencyCode: string) => number;
+  recentTransactions: Transaction[];
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -22,16 +25,21 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [balances, setBalances] = useState<WalletBalance[]>([]);
   const [totalBalance, setTotalBalance] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(
+    [],
+  );
 
   const refreshWallet = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [fetchedBalances, total] = await Promise.all([
+      const [fetchedBalances, total, history] = await Promise.all([
         walletRepository.getBalances(),
         walletRepository.getTotalBalanceInPln(),
+        transactionRepository.getHistory({ limit: 5 }),
       ]);
       setBalances(fetchedBalances);
       setTotalBalance(total);
+      setRecentTransactions(history);
     } catch (err) {
       console.error("[WalletContext] Failed to refresh wallet:", err);
     } finally {
@@ -55,6 +63,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         isLoading,
         refreshWallet,
         getBalance,
+        recentTransactions,
       }}
     >
       {children}

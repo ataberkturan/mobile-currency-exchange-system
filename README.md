@@ -30,5 +30,5 @@ Once the server is running, you can:
 This app is built for the **Network communication in mobile application development W1** class, taught by **Professor Marcin Kacprowicz**.
 
 **Team Members:**
-*   Ataberk Turan
-*   İsmail Ulaş Daysal
+*   Ataberk Turan (49104)
+*   İsmail Ulaş Daysal (48879)

@@ -231,7 +231,18 @@ export const WalletScreen = () => {
               placeholderTextColor={theme.colors.textTertiary}
               keyboardType="numeric"
               value={fundAmount}
-              onChangeText={setFundAmount}
+              onChangeText={(text) => {
+                // Allow numbers and one decimal point
+                const numericValue = text.replace(/[^0-9.]/g, "");
+
+                // Prevent multiple decimal points
+                const parts = numericValue.split(".");
+                if (parts.length > 2) {
+                  setFundAmount(parts[0] + "." + parts.slice(1).join(""));
+                } else {
+                  setFundAmount(numericValue);
+                }
+              }}
             />
             <View style={styles.modalButtons}>
               <Button

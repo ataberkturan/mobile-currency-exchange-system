@@ -226,7 +226,19 @@ export const TradeScreen = () => {
             placeholder="0.00"
             keyboardType="numeric"
             value={amount}
-            onChangeText={setAmount}
+            onChangeText={(text) => {
+              // Allow numbers and one decimal point
+              const numericValue = text.replace(/[^0-9.]/g, "");
+
+              // Prevent multiple decimal points
+              const parts = numericValue.split(".");
+              if (parts.length > 2) {
+                // If multiple dots, keep only the first two parts joined by a dot
+                setAmount(parts[0] + "." + parts.slice(1).join(""));
+              } else {
+                setAmount(numericValue);
+              }
+            }}
             style={styles.input}
           />
 

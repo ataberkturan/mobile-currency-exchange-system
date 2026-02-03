@@ -18,6 +18,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<any>;
+  resetPassword: (token: string, newPassword: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -102,6 +104,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const forgotPassword = async (email: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authRepository.forgotPassword(email);
+      return response;
+    } catch (err) {
+      const message =
+        err instanceof AppError ? err.message : "Failed to send reset link.";
+      setError(message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resetPassword = async (token: string, newPassword: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await authRepository.resetPassword(token, newPassword);
+    } catch (err) {
+      const message =
+        err instanceof AppError ? err.message : "Failed to reset password.";
+      setError(message);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const clearError = () => setError(null);
 
   return (
@@ -114,6 +147,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         register,
         logout,
+        forgotPassword,
+        resetPassword,
         clearError,
       }}
     >

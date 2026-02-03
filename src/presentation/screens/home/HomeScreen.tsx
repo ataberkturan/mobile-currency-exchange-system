@@ -6,40 +6,25 @@ import { Card } from "../../components/Card";
 import { theme } from "../../theme/theme";
 import { useWallet } from "../../context/WalletContext";
 import { useFavorites } from "../../context/FavoritesContext";
-import { transactionRepository } from "../../../data/repositories/TransactionRepository";
+
 import { Transaction } from "../../../domain/entities/Transaction";
 import { ratesRepository } from "../../../data/repositories/RatesRepository";
 import { Rate } from "../../../domain/entities/Rate";
 import { useFocusEffect } from "@react-navigation/native";
 
 export const HomeScreen = () => {
-  const { totalBalance, refreshWallet } = useWallet();
+  const { totalBalance, refreshWallet, recentTransactions } = useWallet();
   const { favorites } = useFavorites();
-  const [transactions, setTransactions] = React.useState<Transaction[]>([]);
   const [favoriteRates, setFavoriteRates] = React.useState<Rate[]>([]);
-  const [isLoadingHistory, setIsLoadingHistory] = React.useState(false);
 
   // Fetch data on screen focus
   useFocusEffect(
     React.useCallback(() => {
       refreshWallet();
-      fetchRecentHistory();
+      refreshWallet();
       fetchFavoriteRates();
     }, [refreshWallet, favorites]),
   );
-
-  const fetchRecentHistory = async () => {
-    try {
-      setIsLoadingHistory(true);
-      const history = await transactionRepository.getHistory();
-      // Take last 5
-      setTransactions(history.slice(0, 5));
-    } catch (e) {
-      console.error("Failed to fetch history", e);
-    } finally {
-      setIsLoadingHistory(false);
-    }
-  };
 
   const fetchFavoriteRates = async () => {
     if (favorites.length === 0) {
@@ -121,7 +106,7 @@ export const HomeScreen = () => {
           <Typography variant="h3">Recent Activity</Typography>
         </View>
 
-        {transactions.length === 0 ? (
+        {recentTransactions.length === 0 ? (
           <Card style={styles.emptyCard}>
             <Typography variant="body" color={theme.colors.textSecondary}>
               No recent activity.
@@ -129,7 +114,7 @@ export const HomeScreen = () => {
           </Card>
         ) : (
           <View style={styles.transactionsList}>
-            {transactions.map((item) => (
+            {recentTransactions.map((item) => (
               <Card key={item.id} style={styles.transactionCard}>
                 <View style={styles.transactionRow}>
                   <View>

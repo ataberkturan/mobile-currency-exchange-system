@@ -56,6 +56,14 @@ export class AuthRepository implements IAuthRepository {
     apiClient.setToken(null);
     await TokenStorage.clearAll();
   }
+
+  async forgotPassword(email: string): Promise<void> {
+    await apiClient.post(ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    await apiClient.post(ENDPOINTS.AUTH.RESET_PASSWORD, { token, newPassword });
+  }
 }
 
 export const authRepository = new AuthRepository();

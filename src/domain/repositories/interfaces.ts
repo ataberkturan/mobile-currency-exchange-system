@@ -21,6 +21,8 @@ export interface IAuthRepository {
   getCurrentUser(): Promise<User | null>;
   getStoredToken(): Promise<string | null>;
   clearSession(): Promise<void>;
+  forgotPassword(email: string): Promise<void>;
+  resetPassword(token: string, newPassword: string): Promise<void>;
 }
 
 export interface HistoricalRatesParams {
